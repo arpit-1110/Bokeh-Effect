@@ -32,9 +32,9 @@ class upConv(nn.Module):
 		return x
 
 class Generator(nn.Module):
-	def __init__(self, n_downsample=2):
+	def __init__(self, n_downsample=2, n_channels=3):
 		super(Generator, self).__init__()
-		model = [downConv(3, 64, take_norm=False)]
+		model = [downConv(n_channels, 64, take_norm=False)]
 		model += [downConv(64, 128)]
 		model += [downConv(128, 256)]
 		model += [downConv(256, 512)]
@@ -47,7 +47,7 @@ class Generator(nn.Module):
 		model += [upConv(512, 256)]
 		model += [upConv(256, 128)]
 		model += [upConv(128, 64)]
-		model += [nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1)]
+		model += [nn.ConvTranspose2d(64, n_channels, kernel_size=4, stride=2, padding=1)]
 		model += [nn.ReLU(True)]
 		model += [nn.Tanh()]
 
@@ -56,11 +56,32 @@ class Generator(nn.Module):
 	def forward(self, x):
 		return self.model(x)
 
+class Discriminator(nn.Module):
+	def __init__(self, n_channels=6):
+		super(Discriminator, self).__init__()
+		model = [downConv(n_channels, 64, take_norm=False)]
+		model += [downConv(64, 128)]
+		model += [downConv(128, 256)]
+		model += [nn.Conv2d(256, 512, kernel_size=2, stride=1)]
+		model += [nn.BatchNorm2d(512)]
+		model += [nn.LeakyReLU(0.2, True)]
+		model += [nn.Conv2d(512, 1, kernel_size=2, stride=1)]
+		model += [nn.Sigmoid()]
+
+		self.model = nn.Sequential(*model)
+
+	def forward(self, inp, un):
+		return self.model(torch.cat((inp, un), 1))
+
+
+
+
 # if __name__ == '__main__':
-# 	data = torch.randn(1, 3, 256, 256)
-# 	model = Generator()
+# 	inp = torch.randn(1, 3, 256, 256)
+# 	un = torch.randn(1, 3, 256, 256)
+# 	model = Discriminator()
 # 	# model2 = downConv(3, 64)
 # 	# print(model)
-# 	print(model(data).size())	
+# 	print(model(inp, un))	
 
 #######################################################################################
