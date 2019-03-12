@@ -1,7 +1,10 @@
 import torch
 import torch.nn as nn
 
-
+if torch.cuda.is_available():
+	torch.set_default_tensor_type('torch.cuda.FloatTensor')
+else:
+	torch.set_default_tensor_type('torch.FloatTensor')
 
 ###### Pix2Pix Utilities ##########################################################
 
