@@ -21,11 +21,13 @@ class Pix2Pix():
 		self.opD = optim.Adam(self.dis.paramaters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 	def get_input(self, data):
-		self.img = data['0']
-		self.true_seg = data['1']
+		self.img, self.true_seg = data
 
-	def forward(self):
-		self.pred_seg = self.gen(self.img)
+	def forward(self, x=None):
+		if x is None:
+			self.pred_seg = self.gen(self.img)
+		else :
+			return self.gen(x)
 
 	def backwardD(self):
 		pred_gen_D = self.dis(self.img.detach(), self.pred_seg.detach())
