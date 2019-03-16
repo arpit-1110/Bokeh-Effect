@@ -56,7 +56,7 @@ class Pix2Pix():
 				for param in x.parameters():
 					param.requires_grad = grad
 
-	def optimize(self):  
+	def optimize(self):
 		self.forward()
 		self.set_requires_grad(self.dis, True)
 		self.opD.zero_grad()
