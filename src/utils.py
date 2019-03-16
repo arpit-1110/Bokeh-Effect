@@ -19,11 +19,12 @@ def dice_loss(inputs, target):
 
 class Optimizer():
 	def __init__(self, lr=None, mu=None, beta1=None, weight_decay=None,
-				 lambda_L1=None, n_epochs=None, scheduler=None):
+				 lambda_L1=None, n_epochs=None, scheduler=None, batch_size=None):
 		self.lr = lr
 		self.mu = mu
 		self.beta1 = beta1
 		self.w_decay = weight_decay
 		self.lambda_L1 = lambda_L1
-		self.epochs = no_epochs
+		self.epochs = n_epochs
 		self.scheduler = scheduler
+		self.batch_size = batch_size

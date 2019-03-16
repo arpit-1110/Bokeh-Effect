@@ -17,8 +17,9 @@ class Pix2Pix():
 		self.dis = Discriminator()
 		self.GAN_loss = nn.MSELoss()
 		self.L1 = nn.L1Loss()
-		self.opG = optim.Adam(self.gen.paramaters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-		self.opD = optim.Adam(self.dis.paramaters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+		self.opG = optim.Adam(self.gen.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+		self.opD = optim.Adam(self.dis.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+		self.opt = opt
 
 	def get_input(self, data):
 		self.img, self.true_seg = data
@@ -31,28 +32,37 @@ class Pix2Pix():
 
 	def backwardD(self):
 		pred_gen_D = self.dis(self.img.detach(), self.pred_seg.detach())
-		self.loss1 = self.GAN_loss(pred_gen_D, False)
+		self.loss1 = self.GAN_loss(pred_gen_D, torch.ones(pred_gen_D.size()))
 		predD = self.dis(self.img, self.true_seg)
-		self.loss2 = self.GAN_loss(predD, True)
+		self.loss2 = self.GAN_loss(predD, torch.zeros(predD.size()))
 
 		self.loss = 0.5 * (self.loss1 + self.loss2)
 		self.loss.backward()
 
 	def backwardG(self):
 		pred_gen_D = self.dis(self.img, self.pred_seg)
-		self.loss1 = self.GAN_loss(pred_gen_D, True)
-		self.loss2 = opt.lambda_L1 * self.L1(self.pred_seg, self.true_seg)
+		self.loss1 = self.GAN_loss(pred_gen_D, torch.ones(pred_gen_D.size()))
+		self.loss2 = self.opt.lambda_L1 * self.L1(self.pred_seg, self.true_seg)
 
 		self.loss = self.loss1 + self.loss2
 		self.loss.backward()
 
+	def set_requires_grad(self, model, grad=False):
+		if not isinstance(model, list):
+			model = [model]
+
+		for x in model:
+			if x is not None:
+				for param in x.parameters():
+					param.requires_grad = grad
+
 	def optimize(self):  
 		self.forward()
-		self.netD = torch.tensor(self.netD, requires_grad=True)
+		self.set_requires_grad(self.dis, True)
 		self.opD.zero_grad()
 		self.backwardD()
 		self.opD.step()
-		self.netD = torch.tensor(self.netD, requires_grad=False)
+		self.set_requires_grad(self.dis, False)
 		self.opG.zero_grad()
 		self.backwardG()
 		self.opG.step()
