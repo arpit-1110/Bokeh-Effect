@@ -44,7 +44,7 @@ class Pix2Pix():
 		self.loss = self.loss1 + self.loss2
 		self.loss.backward()
 
-	def optimize(self):  
+	def optimize(self):
 		self.forward()
 		self.netD = torch.tensor(self.netD, requires_grad=True)
 		self.opD.zero_grad()
