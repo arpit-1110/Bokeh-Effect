@@ -139,6 +139,7 @@ class CycleDiscriminator(nn.Module):
 		out = F.relu(self.conv4(out))
 
 		out = self.conv5(out)
+		out = nn.Sigmoid(out)
 		return out
 
 

@@ -7,7 +7,7 @@ from torch.optim import lr_scheduler
 import time
 import copy
 from torch.autograd import Variable
-from utils import dice_coeff
+from utils import dice_coeff, normalization
 from data_loader import NYU_Depth_V2
 from PIL import Image
 
@@ -45,7 +45,9 @@ def train(opt, model_name):
 				count = 0
 				for i, Data in enumerate(dataloader[phase]):
 					inputs, masks = Data
-					inputs, masks = Variable(inputs), Variable(masks)
+					inputs = normalization(inputs)  ##Changes made here
+					masks = normalization(masks)
+					inputs, masks = Variable(inputs), Variable(masks)  ##Ye Variable kyu likha hai ek baar batana
 					Data = inputs, masks
 					with torch.set_grad_enabled(phase == 0):
 						model.get_input(data=Data)
@@ -53,7 +55,7 @@ def train(opt, model_name):
 							model.optimize()
 						else:
 							pred_mask = model.forward(inputs)
-							t = ToPILImage()
+							t = ToPILImage()  ## Arpit is line me kuch error hai
 							a = {j: t(pred_mask[i].cpu().detach()) for j in range(opt.batch_size)}
 							b = {j: t(inputs[i].cpu().detach()) for j in range(opt.batch_size)}
 							for j in range(opt.batch_size):
