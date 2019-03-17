@@ -10,8 +10,11 @@ def dice_coeff(inputs, target):
         iflat = inputs[i, :, :, :].view(-1)
         tflat = target[i, :, :, :].view(-1)
         intersection = torch.dot(iflat, tflat)
+        # print(intersection)
+        # print(iflat.sum())
+        # print(tflat.sum())
         coeff += (2. * intersection) / (iflat.sum() + tflat.sum() + eps)
-    return coeff / inputs.shape[0]
+    return coeff / (inputs.shape[0] * 3)
 
 
 def dice_loss(inputs, target):

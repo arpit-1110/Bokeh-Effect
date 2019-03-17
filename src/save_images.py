@@ -36,8 +36,8 @@ def save_image_dep(image_id):
     print(np.amax(depth_))
     depth_ = 255.*cv2.normalize(depth_, 0, 255, cv2.NORM_MINMAX)
 
-    cv2.imwrite(os.path.join(img_folder,'{}_img.jpg'.format(i)), img_)
-    cv2.imwrite(os.path.join(dep_folder,'{}_depth.jpg'.format(i)), depth_)
+    cv2.imwrite(os.path.join(img_folder,'{}_img.png'.format(i)), img_)
+    cv2.imwrite(os.path.join(dep_folder,'{}_depth.png'.format(i)), depth_)
 
 # map(save_image_dep, range(len(f.get('images').value)))
 for i in range(len(images)):

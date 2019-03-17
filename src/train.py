@@ -9,7 +9,10 @@ import copy
 from torch.autograd import Variable
 from utils import dice_coeff
 from data_loader import NYU_Depth_V2
-from PIL import Image
+import cv2
+import numpy as np
+import os
+# from torchvision.transforms import ToPILImage
 
 if torch.cuda.is_available():
 	torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -23,15 +26,15 @@ print('Loaded val set')
 
 dataset = {0: train_set, 1: val_set}
 
-opt = Optimizer(lr=1e-2, mu=0.9, beta1=0.9, lambda_L1=1, n_epochs=10, batch_size=4)
+opt = Optimizer(lr=2 * 1e-4, beta1=0.5, lambda_L1=0.1, n_epochs=50, batch_size=2)
 
 
 dataloader = {x: torch.utils.data.DataLoader(
-    dataset[x], batch_size=opt.batch_size, shuffle=True, num_workers=0)for x in range(2)}
+    dataset[x], batch_size=opt.batch_size, shuffle=True, num_workers=0) for x in range(2)}
 
 dataset_size = {x: len(dataset[x]) for x in range(2)}
 
-# print(dataset_size)
+print(dataset_size)
 def train(opt, model_name):
 	if model_name == 'pix2pix':
 		model = Pix2Pix(opt)
@@ -48,21 +51,29 @@ def train(opt, model_name):
 					inputs, masks = Variable(inputs), Variable(masks)
 					Data = inputs, masks
 					with torch.set_grad_enabled(phase == 0):
-						model.get_input(data=Data)
+						model.get_input(Data)
 						if phase == 0:
 							model.optimize()
 						else:
 							pred_mask = model.forward(inputs)
-							t = ToPILImage()
-							a = {j: t(pred_mask[i].cpu().detach()) for j in range(opt.batch_size)}
-							b = {j: t(inputs[i].cpu().detach()) for j in range(opt.batch_size)}
-							for j in range(opt.batch_size):
-								a[j].save('../results/pred_masks/mask' +
-								 '_' + str(i) + '_' + str(j) + '_' + str(epoch) + '.png')
-								b[j].save('../results/inputs/input' +
-								 '_' + str(i) + '_' + str(j) + '_' + str(epoch) + '.png')
+							print(pred_mask.size())
+
+							# t = ToPILImage()
+							# a = {j: t(pred_mask[j].cpu().detach()) for j in range(pred_mask.size()[0])}
+							# b = {j: t(inputs[j].cpu().detach()) for j in range(inputs.size()[0])}
+							for j in range(pred_mask.size()[0]):
+								cv2.imwrite( os.path.join('../results/pred_masks', 
+									'mask_{}_{}_{}.png'.format(i, j, epoch)),
+								  np.array(pred_mask[j].cpu().detach()).reshape(256, 256, 3))
+								cv2.imwrite( os.path.join('../results/inputs', 
+									'input_{}_{}_{}.png'.format(i, j, epoch)),
+								  np.array(inputs[j].cpu().detach()).reshape(256, 256, 3))
+							# print(pred_mask.size())
+							# print(masks.size())
+							# print(dice_coeff(pred_mask, masks))
 							val_dice += dice_coeff(pred_mask, masks)
-			print("Validation Dice Coefficient is " + str(val_dice))
+							count += 1
+			print("Validation Dice Coefficient is " + str(val_dice/count))
 			time_elapsed = time.time() - since
 			print('Epoch completed in {:.0f}m {:.0f}s'.format(
         			time_elapsed // 60, time_elapsed % 60))

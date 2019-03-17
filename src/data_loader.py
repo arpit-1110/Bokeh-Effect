@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torch.utils.data
 import glob
-from PIL import Image
+import cv2
 
 class NYU_Depth_V2(torch.utils.data.Dataset):
 	def __init__(self, data_type, transform=None):
@@ -11,10 +11,10 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
 		if data_type != 'train' and data_type != 'val' and data_type != 'test':
 			raise ValueError('Invalid data type')
 		self.data_type = data_type 
-		self.X_train = glob.glob(img_path + '_train/*img.jpg')
-		self.y_train = glob.glob(depth_path + '_train/*depth.jpg')
-		self.X_val = glob.glob(img_path + '_val/*img.jpg')
-		self.y_val = glob.glob(depth_path + '_val/*depth.jpg')
+		self.X_train = glob.glob(img_path + '_train/8*img.jpg')
+		self.y_train = glob.glob(depth_path + '_train/8*depth.jpg')
+		self.X_val = glob.glob(img_path + '_val/100*img.jpg')
+		self.y_val = glob.glob(depth_path + '_val/100*depth.jpg')
 		self.X_test = glob.glob(img_path + '_test/*img.jpg')
 		self.y_test = glob.glob(depth_path + '_test/*depth.jpg')
 
@@ -28,20 +28,20 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
 
 	def __getitem__(self, idx):
 		if self.data_type == 'train':
-			X = np.array(Image.open(self.X_train[idx])).reshape(3, 256, 256)
-			y = np.array(Image.open(self.y_train[idx])).reshape(3, 256, 256)
+			X = np.array(cv2.imread(self.X_train[idx])).reshape(3, 256, 256)
+			y = np.array(cv2.imread(self.y_train[idx])).reshape(3, 256, 256)
 
 			return torch.from_numpy(X).float(), torch.from_numpy(y).float()
 
-		if self.data_type == 'train':
-			X = np.array(Image.open(self.X_val[idx])).reshape(3, 256, 256)
-			y = np.array(Image.open(self.y_val[idx])).reshape(3, 256, 256)
+		if self.data_type == 'val':
+			X = np.array(cv2.imread(self.X_val[idx])).reshape(3, 256, 256)
+			y = np.array(cv2.imread(self.y_val[idx])).reshape(3, 256, 256)
 
 			return torch.from_numpy(X).float(), torch.from_numpy(y).float()
 
-		if self.data_type == 'train':
-			X = np.array(Image.open(self.X_test[idx])).reshape(3, 256, 256)
-			y = np.array(Image.open(self.y_test[idx])).reshape(3, 256, 256)
+		if self.data_type == 'test':
+			X = np.array(cv2.imread(self.X_test[idx])).reshape(3, 256, 256)
+			y = np.array(cv2.imread(self.y_test[idx])).reshape(3, 256, 256)
 
 			return torch.from_numpy(X).float(), torch.from_numpy(y).float()
 
