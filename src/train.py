@@ -7,7 +7,7 @@ from torch.optim import lr_scheduler
 import time
 import copy
 from torch.autograd import Variable
-from utils import dice_coeff
+from utils import dice_coeff, normalization
 from data_loader import NYU_Depth_V2
 import cv2
 import numpy as np
@@ -48,7 +48,9 @@ def train(opt, model_name):
 				count = 0
 				for i, Data in enumerate(dataloader[phase]):
 					inputs, masks = Data
-					inputs, masks = Variable(inputs), Variable(masks)
+					inputs = normalization(inputs)  ##Changes made here
+					masks = normalization(masks)
+					inputs, masks = Variable(inputs), Variable(masks)  ##Ye Variable kyu likha hai ek baar batana
 					Data = inputs, masks
 					with torch.set_grad_enabled(phase == 0):
 						model.get_input(Data)
@@ -56,7 +58,6 @@ def train(opt, model_name):
 							model.optimize()
 						else:
 							pred_mask = model.forward(inputs)
-							print(pred_mask.size())
 
 							# t = ToPILImage()
 							# a = {j: t(pred_mask[j].cpu().detach()) for j in range(pred_mask.size()[0])}
@@ -68,9 +69,7 @@ def train(opt, model_name):
 								cv2.imwrite( os.path.join('../results/inputs', 
 									'input_{}_{}_{}.png'.format(i, j, epoch)),
 								  np.array(inputs[j].cpu().detach()).reshape(256, 256, 3))
-							# print(pred_mask.size())
-							# print(masks.size())
-							# print(dice_coeff(pred_mask, masks))
+
 							val_dice += dice_coeff(pred_mask, masks)
 							count += 1
 			print("Validation Dice Coefficient is " + str(val_dice/count))
