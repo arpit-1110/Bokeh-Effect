@@ -14,10 +14,16 @@ def dice_coeff(inputs, target):
         # print(iflat.sum())
         # print(tflat.sum())
         coeff += (2. * intersection) / (iflat.sum() + tflat.sum() + eps)
-    return coeff / (inputs.shape[0] * 3)
+    return coeff / (inputs.shape[0])
 
 def normalization(X):
-    return X / 127.5 - 1
+    return X / 127.5 - 1.0
+
+def denormalize(X, flag=None):
+	if flag is None:
+		return (X + 1.0) * 127.5
+	else:
+		return (X + 1.0) / 2.0
 
 def dice_loss(inputs, target):
     return 1 - dice_coeff(inputs, target)

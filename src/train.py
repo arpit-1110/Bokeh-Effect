@@ -7,7 +7,7 @@ from torch.optim import lr_scheduler
 import time
 import copy
 from torch.autograd import Variable
-from utils import dice_coeff, normalization
+from utils import dice_coeff, normalization, denormalize
 from data_loader import NYU_Depth_V2
 import cv2
 import numpy as np
@@ -26,13 +26,15 @@ print('Loaded val set')
 
 dataset = {0: train_set, 1: val_set}
 
-opt = Optimizer(lr=2 * 1e-4, beta1=0.5, lambda_L1=0.1, n_epochs=50, batch_size=2)
+opt = Optimizer(lr=1e-4, beta1=0.5, lambda_L1=0.01, n_epochs=50, batch_size=4)
 
 
 dataloader = {x: torch.utils.data.DataLoader(
     dataset[x], batch_size=opt.batch_size, shuffle=True, num_workers=0) for x in range(2)}
 
 dataset_size = {x: len(dataset[x]) for x in range(2)}
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 print(dataset_size)
 def train(opt, model_name):
@@ -48,29 +50,41 @@ def train(opt, model_name):
 				count = 0
 				for i, Data in enumerate(dataloader[phase]):
 					inputs, masks = Data
+					inputs, masks = inputs.to(device), masks.to(device)
 					inputs = normalization(inputs)  ##Changes made here
 					masks = normalization(masks)
 					inputs, masks = Variable(inputs), Variable(masks)  ##Ye Variable kyu likha hai ek baar batana
-					Data = inputs, masks
+					Data = inputs, masks                               ## --> kyuki isse computation fast ho jaata 
+																	   ## memoization ki vajah se
 					with torch.set_grad_enabled(phase == 0):
 						model.get_input(Data)
 						if phase == 0:
 							model.optimize()
+							pred_mask = model.forward(inputs)
+							if i%25 == 0:
+								for j in range(pred_mask.size()[0]):
+									cv2.imwrite( os.path.join('../results/pred_masks', 
+										'train_mask_{}_{}_{}.png'.format(i, j, epoch)),
+									  np.array(denormalize(pred_mask[j]).cpu().detach()).reshape(256, 256, 3))
+									cv2.imwrite( os.path.join('../results/inputs', 
+										'train_input_{}_{}_{}.png'.format(i, j, epoch)),
+									  np.array(denormalize(inputs[j]).cpu().detach()).reshape(256, 256, 3))
 						else:
 							pred_mask = model.forward(inputs)
 
 							# t = ToPILImage()
 							# a = {j: t(pred_mask[j].cpu().detach()) for j in range(pred_mask.size()[0])}
 							# b = {j: t(inputs[j].cpu().detach()) for j in range(inputs.size()[0])}
-							for j in range(pred_mask.size()[0]):
-								cv2.imwrite( os.path.join('../results/pred_masks', 
-									'mask_{}_{}_{}.png'.format(i, j, epoch)),
-								  np.array(pred_mask[j].cpu().detach()).reshape(256, 256, 3))
-								cv2.imwrite( os.path.join('../results/inputs', 
-									'input_{}_{}_{}.png'.format(i, j, epoch)),
-								  np.array(inputs[j].cpu().detach()).reshape(256, 256, 3))
+							if i%25 == 0:
+								for j in range(pred_mask.size()[0]):
+									cv2.imwrite( os.path.join('../results/pred_masks', 
+										'mask_{}_{}_{}.png'.format(i, j, epoch)),
+									  np.array(denormalize(pred_mask[j]).cpu().detach()).reshape(256, 256, 3))
+									cv2.imwrite( os.path.join('../results/inputs', 
+										'input_{}_{}_{}.png'.format(i, j, epoch)),
+									  np.array(denormalize(inputs[j]).cpu().detach()).reshape(256, 256, 3))
 
-							val_dice += dice_coeff(pred_mask, masks)
+							val_dice += dice_coeff(denormalize(pred_mask, flag=1), denormalize(masks, flag=1))
 							count += 1
 			print("Validation Dice Coefficient is " + str(val_dice/count))
 			time_elapsed = time.time() - since
