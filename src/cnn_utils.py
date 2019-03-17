@@ -36,7 +36,7 @@ class upConv(nn.Module):
 		return x
 
 class Generator(nn.Module):
-	def __init__(self, n_downsample=2, n_channels=3):
+	def __init__(self, n_downsample=3, n_channels=3):
 		super(Generator, self).__init__()
 		model = [downConv(n_channels, 64, take_norm=False)]
 		model += [downConv(64, 128)]

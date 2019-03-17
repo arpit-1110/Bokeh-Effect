@@ -11,10 +11,10 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
 		if data_type != 'train' and data_type != 'val' and data_type != 'test':
 			raise ValueError('Invalid data type')
 		self.data_type = data_type 
-		self.X_train = glob.glob(img_path + '_train/8*img.jpg')
-		self.y_train = glob.glob(depth_path + '_train/8*depth.jpg')
-		self.X_val = glob.glob(img_path + '_val/100*img.jpg')
-		self.y_val = glob.glob(depth_path + '_val/100*depth.jpg')
+		self.X_train = glob.glob(img_path + '_train/*img.jpg')
+		self.y_train = glob.glob(depth_path + '_train/*depth.jpg')
+		self.X_val = glob.glob(img_path + '_val/10*img.jpg')
+		self.y_val = glob.glob(depth_path + '_val/10*depth.jpg')
 		self.X_test = glob.glob(img_path + '_test/*img.jpg')
 		self.y_test = glob.glob(depth_path + '_test/*depth.jpg')
 
