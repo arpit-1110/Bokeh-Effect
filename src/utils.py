@@ -19,6 +19,9 @@ def dice_coeff(inputs, target):
 def normalization(X):
     return X / 127.5 - 1.0
 
+def scale(X):
+    return 2*X-1
+
 def denormalize(X, flag=None):
 	if flag is None:
 		return (X + 1.0) * 127.5

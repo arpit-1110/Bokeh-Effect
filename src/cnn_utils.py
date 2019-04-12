@@ -124,11 +124,11 @@ class ResidualBlock(nn.Module):
 
 class CycleDiscriminator(nn.Module):
 	def __init__(self,conv_dim=64):
+		super(CycleDiscriminator,self).__init__()
 		self.conv1 = c_downConv(3,conv_dim,4,batch_norm=False)
 		self.conv2 = c_downConv(conv_dim,conv_dim*2,4)
 		self.conv3 = c_downConv(conv_dim*2,conv_dim*4,4)
 		self.conv4 = c_downConv(conv_dim*4,conv_dim*8,4)
-
 		self.conv5 = c_downConv(conv_dim*8,1,4,stride=1,batch_norm=False)
 
 
@@ -139,7 +139,8 @@ class CycleDiscriminator(nn.Module):
 		out = F.relu(self.conv4(out))
 
 		out = self.conv5(out)
-		out = nn.Sigmoid(out)
+		out = F.sigmoid(out)
+		# out = nn.Sigmoid(out)
 		return out
 
 
@@ -152,7 +153,7 @@ class CycleGenerator(nn.Module):
 
 		res_layers=[]
 		for i in range(res_blocks):
-			res_layers+=ResidualBlock(conv_dim*4)
+			res_layers.append(ResidualBlock(conv_dim=conv_dim*4))
 
 		self.res_blocks=nn.Sequential(*res_layers)
 

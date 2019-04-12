@@ -13,7 +13,7 @@ else:
 
 class cycleGan():
 
-    def __init__(self,  g_conv_dim=64, d_conv_dim=64,res_blocks=6,lr=0.0002, beta1=0.5, beta2=0.999):
+    def __init__(self,  g_conv_dim=64, d_conv_dim=64,res_blocks=4,lr=0.001, beta1=0.5, beta2=0.999):
         super(cycleGan, self).__init__()
         self.G_XtoY = CycleGenerator(g_conv_dim, res_blocks)
         self.G_YtoX = CycleGenerator(d_conv_dim, res_blocks)
@@ -23,6 +23,10 @@ class cycleGan():
         self.g_optim = optim.Adam(self.genParams,lr,[beta1,beta2])
         self.dx_optim = optim.Adam(self.D_X.parameters(),lr,[beta1,beta2])
         self.dy_optim = optim.Adam(self.D_Y.parameters(),lr,[beta1,beta2])
+
+    def get_input(self, inputX, inputY):
+        self.inputX = inputX
+        self.inputY = inputY
 
 
     def trainDX(self, inputX, inputY):
@@ -35,6 +39,7 @@ class cycleGan():
         fake_loss = fake_mse_loss(out_X_fake)
 
         loss = fake_loss + real_loss
+        self.dx_loss = loss
         loss = loss.backward()
         self.dx_optim.step()
 
@@ -48,6 +53,7 @@ class cycleGan():
         fake_loss = fake_mse_loss(out_Y_fake)
 
         loss = fake_loss + real_loss
+        self.dy_loss = loss
         loss = loss.backward()
         self.dy_optim.step()
 
@@ -69,6 +75,21 @@ class cycleGan():
         reconstructed_x_loss = cycle_consistency_loss(inputX, reconstructed_X, lambda_weight=10)
 
         g_total_loss = g_YtoX_loss + g_XtoY_loss + reconstructed_y_loss + reconstructed_x_loss
+        self.gen_loss = g_total_loss
         g_total_loss.backward()
         self.g_optim.step()
+
+    def optimize(self):
+        # print(self.inputX.size())
+        # print(self.inputY.size())
+        a = self.inputX
+        b = self.inputY
+        self.trainDX(a, b)
+        self.trainDY(a, b)
+        self.trainGen(a, b)
+
+
+
+
+
 
