@@ -3,7 +3,7 @@ import torch.nn as nn
 import sys
 from pix2pix import Pix2Pix
 from cycleGAN import cycleGan
-from utils import Optimizer, cgOptimizer
+from utils import Optimizer, cgOptimizer, p2pOptimizer
 from torch.optim import lr_scheduler
 import time
 import copy
@@ -85,12 +85,15 @@ dataset = {0: train_set, 1: val_set}
 
 if len(sys.argv) == 3:
 	cg_dataset = {0: cg_train_set, 1: cg_val_set}
+	p2p_dataset = {0: cg_train_set, 1: cg_val_set}
 
 else:
 	cg_dataset = {0: train_set, 1: val_set}
-
+	p2p_dataset = {0: train_set, 1: val_set}
 
 opt = Optimizer(lr=1e-4, beta1=0.5, lambda_L1=0.01, n_epochs=100, batch_size=4)
+
+p2p_opt = p2pOptimizer(input_nc=3, output_nc=3, num_downs=8, ngf=64, norm_layer=nn.InstanceNorm2d, use_dropout=False, ndf=64, n_layers_D=3, lr=0.0001, beta1=0.5, lambda_L1=5, n_blocks=9, padding_type='replicate')
 
 cg_opt = cgOptimizer(input_nc=3, output_nc=3, ngf=64, norm=nn.InstanceNorm2d, no_dropout=True, n_blocks=9,
                  padding_type='replicate', ndf=64, n_layers_D = 3, pool_size = 50, lr = 0.0001, beta1 = 0.5 , lambda_A = 5, lambda_B = 5,pool=False)
@@ -103,6 +106,8 @@ dataloader = {x: torch.utils.data.DataLoader(
 cg_train_loader = torch.utils.data.DataLoader(cg_dataset[0], batch_size = 2, shuffle=True, num_workers=0)
 cg_val_loader = torch.utils.data.DataLoader(cg_dataset[1], batch_size = 4, shuffle=True, num_workers=0)
 
+p2p_train_loader = torch.utils.data.DataLoader(p2p_dataset[0], batch_size = 1, shuffle=True, num_workers=0)
+p2p_val_loader = torch.utils.data.DataLoader(p2p_dataset[1], batch_size = 4, shuffle=True, num_workers=0)
 
 dataset_size = {x: len(dataset[x]) for x in range(2)}
 
@@ -241,5 +246,70 @@ def train(opt, model_name):
 				pickle.dump(loss_DYl, f)
 
 
+	elif model_name == 'P2P':
+		model = Pix2Pix(p2p_opt)
+		print_freq = 10
+		train_iter = iter(p2p_train_loader)
+		val_iter = iter(p2p_val_loader)
+		fixed_X , fixed_Y = val_iter.next()
+		fixed_X = normalization(fixed_X).to(device)
+		fixed_Y = normalization(fixed_Y).to(device)
+		loss_Gl = []
+		loss_Dl = []
 
-train(opt, 'CycleGAN')
+
+		num_batches = len(train_iter)
+		for epoch in range(3000):
+
+			if epoch == 999:
+				model.change_lr(model.opt.lr/2)
+
+			if epoch == 1999:
+				model.change_lr(model.opt.lr/2)
+
+			since = time.time()
+			print("Epoch ", epoch ," entering ")
+			train_iter = iter(p2p_train_loader)
+			for batch in range(num_batches):
+				print("Epoch ", epoch ,"Batch ", batch, " running with learning rate ", model.opt.lr)
+				inputX,inputY = train_iter.next()
+				inputX = normalization(inputX).to(device)
+				inputY = normalization(inputY).to(device)
+				model.get_input(inputX,inputY)
+				model.optimize()
+				# print("Dx Loss : {:.6f} Dy Loss: {:.6f} Generator Loss: {:.6f} ".format(model.dx_loss, model.dy_loss, model.gen_loss))
+				print("Model D Loss " , float(model.loss_D), "Model G loss", float(model.loss_G))
+
+
+
+			if (epoch+1)%10 == 0:
+				# torch.set_grad_enabled(False)
+				depth_map = model.G.forward(fixed_X)
+				for j in range(depth_map.size()[0]):
+					cv2.imwrite( os.path.join('../p2presults/pred_masks',
+						'mask_{}_{}_{}.png'.format(batch, j, epoch)),
+					  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,3))
+					if epoch == 9:
+						cv2.imwrite( os.path.join('../p2presults/inputs',
+							'input_{}_{}_{}.png'.format(batch, j, epoch)),
+						  np.array(denormalize(fixed_X[j]).cpu().detach()).reshape(256,256, 3))
+						cv2.imwrite( os.path.join('../p2presults/inputs',
+							'ground_depth_{}_{}_{}.png'.format(batch, j, epoch)),
+						  np.array(denormalize(fixed_Y[j]).cpu().detach()).reshape(256,256, 3))
+
+
+				# torch.set_grad_enabled(True)
+
+			print("Time to finish epoch ", time.time()-since)
+
+			torch.save(model, '../P2Pmodel/best_model6.pt')
+			loss_Gl.append(float(model.loss_G))
+			loss_Dl.append(float(model.loss_D))
+			with open('../P2Ploss/lossG6.pk', 'wb') as f:
+				pickle.dump(loss_Gl, f)
+			with open('../P2Ploss/lossD6.pk', 'wb') as f:
+				pickle.dump(loss_Dl, f)
+
+
+
+train(opt, 'P2P')
