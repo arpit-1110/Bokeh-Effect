@@ -247,7 +247,7 @@ class ResnetBlock(nn.Module):
 
         model += [nn.Conv2d(dim, dim, kernel_size=3, padding=p, bias=use_bias), norm_layer(dim), nn.ReLU(True)]
         if use_dropout:
-            model+= nn.Dropout(0.5)
+            model+= [nn.Dropout(0.5)]
 
         p = 0
         if padding_type == 'reflect':

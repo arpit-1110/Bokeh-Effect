@@ -17,7 +17,7 @@ from init_model import init_weights
 
 torch.set_default_tensor_type('torch.FloatTensor')
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Pix2Pix():
@@ -26,8 +26,8 @@ class Pix2Pix():
     def __init__(self,opt):
         super(Pix2Pix, self).__init__()
         self.opt = opt
-        self.G = UnetGenerator(opt.input_nc, opt.output_nc, opt.num_downs, opt.ngf, opt.norm_layer, opt.use_dropout).to(device)
-        # self.G = RensetGenerator(opt.input_nc, opt.output_nc, opt.ngf, opt.norm_layer, opt.use_dropout, opt.n_blocks, opt.padding_type).to(device)
+        # self.G = UnetGenerator(opt.input_nc, opt.output_nc, opt.num_downs, opt.ngf, opt.norm_layer, opt.use_dropout).to(device)
+        self.G = RensetGenerator(opt.input_nc, opt.output_nc, opt.ngf, opt.norm_layer, opt.use_dropout, opt.n_blocks, opt.padding_type).to(device)
         self.D = PatchDiscriminator(self.opt.input_nc + self.opt.output_nc, self.opt.ndf, self.opt.n_layers_D, self.opt.norm_layer).to(device)
         print(self.G)
         print("Parameters: " ,len(list(self.G.parameters())))
@@ -94,8 +94,8 @@ class Pix2Pix():
         self.backward_G()                   # calculate graidents for G
         self.optimizer_G.step()             # udpate G's weight
 
-        self.forward()
-        self.optimizer_G.zero_grad()        # set G's gradients to zero
-        self.backward_G()                   # calculate graidents for G
-        self.optimizer_G.step()
+        # self.forward()
+        # self.optimizer_G.zero_grad()        # set G's gradients to zero
+        # self.backward_G()                   # calculate graidents for G
+        # self.optimizer_G.step()
         self.set_requires_grad(self.D, True)

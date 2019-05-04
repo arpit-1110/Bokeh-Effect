@@ -93,7 +93,7 @@ else:
 
 opt = Optimizer(lr=1e-4, beta1=0.5, lambda_L1=0.01, n_epochs=100, batch_size=4)
 
-p2p_opt = p2pOptimizer(input_nc=3, output_nc=3, num_downs=8, ngf=64, norm_layer=nn.InstanceNorm2d, use_dropout=False, ndf=64, n_layers_D=3, lr=0.0001, beta1=0.5, lambda_L1=5, n_blocks=9, padding_type='replicate')
+p2p_opt = p2pOptimizer(input_nc=3, output_nc=3, num_downs=8, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=True, ndf=64, n_layers_D=3, lr=0.0002, beta1=0.5, lambda_L1=5, n_blocks=9, padding_type='reflect')
 
 cg_opt = cgOptimizer(input_nc=3, output_nc=3, ngf=64, norm=nn.InstanceNorm2d, no_dropout=True, n_blocks=9,
                  padding_type='replicate', ndf=64, n_layers_D = 3, pool_size = 50, lr = 0.0001, beta1 = 0.5 , lambda_A = 5, lambda_B = 5,pool=False)
@@ -106,12 +106,12 @@ dataloader = {x: torch.utils.data.DataLoader(
 cg_train_loader = torch.utils.data.DataLoader(cg_dataset[0], batch_size = 2, shuffle=True, num_workers=0)
 cg_val_loader = torch.utils.data.DataLoader(cg_dataset[1], batch_size = 4, shuffle=True, num_workers=0)
 
-p2p_train_loader = torch.utils.data.DataLoader(p2p_dataset[0], batch_size = 1, shuffle=True, num_workers=0)
+p2p_train_loader = torch.utils.data.DataLoader(p2p_dataset[0], batch_size = 4, shuffle=True, num_workers=0)
 p2p_val_loader = torch.utils.data.DataLoader(p2p_dataset[1], batch_size = 4, shuffle=True, num_workers=0)
 
 dataset_size = {x: len(dataset[x]) for x in range(2)}
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # print(dataset_size)
 def train(opt, model_name):
@@ -261,10 +261,10 @@ def train(opt, model_name):
 		num_batches = len(train_iter)
 		for epoch in range(3000):
 
-			if epoch == 999:
+			if epoch == 299:
 				model.change_lr(model.opt.lr/2)
 
-			if epoch == 1999:
+			if epoch == 499:
 				model.change_lr(model.opt.lr/2)
 
 			since = time.time()
@@ -302,12 +302,12 @@ def train(opt, model_name):
 
 			print("Time to finish epoch ", time.time()-since)
 
-			torch.save(model, '../P2Pmodel/best_model6.pt')
+			torch.save(model, '../P2Pmodel/best_model8.pt')
 			loss_Gl.append(float(model.loss_G))
 			loss_Dl.append(float(model.loss_D))
-			with open('../P2Ploss/lossG6.pk', 'wb') as f:
+			with open('../P2Ploss/lossG8.pk', 'wb') as f:
 				pickle.dump(loss_Gl, f)
-			with open('../P2Ploss/lossD6.pk', 'wb') as f:
+			with open('../P2Ploss/lossD8.pk', 'wb') as f:
 				pickle.dump(loss_Dl, f)
 
 
