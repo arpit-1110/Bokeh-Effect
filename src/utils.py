@@ -2,6 +2,7 @@ import torch
 import sys
 import math
 import random
+import cv2
 
 
 def dice_coeff(inputs, target):
@@ -78,6 +79,43 @@ class p2pOptimizer():
         self.lambda_L1=lambda_L1
         self.n_blocks=n_blocks
         self.padding_type=padding_type
+
+def get_faces(img):
+    face_cascade = cv2.CascadeClassifier(
+        'haarcascades/haarcascade_frontalface_default.xml')
+    # eye_cascade = cv2.CascadeClassifier('haarcascades/haarcascade_eye.xml')
+    img = cv2.imread(img)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    return faces
+
+def ab_rel_diff(ip, tar):
+    diff = 0
+    for i in range(ip.shape[0]):
+        iflat = ip[i, :, :, :].view(-1)
+        tflat = tar[i, :, :, :].view(-1)
+        absm = abs(iflat-tflat)/tflat
+        diff+=absm.sum()/len(iflat)
+    return diff/ip.shape[0]
+
+def sq_rel_diff(ip, tar):
+    diff = 0
+    for i in range(ip.shape[0]):
+        iflat = ip[i, :, :, :].view(-1)
+        tflat = tar[i, :, :, :].view(-1)
+        absm = abs(iflat-tflat)**2/tflat
+        diff += absm.sum()/len(iflat)
+    return diff/ip.shape[0]
+
+def rms_linear(ip, tar):
+    diff = 0
+    for i in range(ip.shape[0]):
+        iflat = ip[i, :, :, :].view(-1)
+        tflat = tar[i, :, :, :].view(-1)
+        absm = abs(iflat-tflat)**2
+        absm = 255*absm
+        diff += (absm.sum()/len(iflat))**0.5
+    return diff/ip.shape[0]
 
 
 class ImagePool():

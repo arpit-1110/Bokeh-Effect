@@ -1,7 +1,7 @@
 import torch
 import cv2
 import sys
-from utils import dice_coeff,dice_loss,normalization,denormalize
+from utils import dice_coeff,dice_loss,normalization,denormalize,ab_rel_diff,sq_rel_diff,rms_linear
 import numpy as np
 def set_requires_grad(nets, requires_grad=False):
 
@@ -16,8 +16,8 @@ def set_requires_grad(nets, requires_grad=False):
 modelName = sys.argv[1]
 modelType = sys.argv[2]
 
-imagePath = input('Enter Image Path: ')
-depthMap = input('Enter Corresponding Depthmap: ')
+imagePath = sys.argv[3]
+depthMap = sys.argv[4]
 
 image = cv2.resize(cv2.imread(imagePath),(256,256), interpolation=cv2.INTER_CUBIC)
 depth = cv2.resize(cv2.imread(depthMap),(256,256), interpolation=cv2.INTER_CUBIC)
@@ -46,4 +46,10 @@ cv2.imwrite("testDepth.jpg", np.array(denormalize(depth).cpu().detach()).reshape
 pred_depth = denormalize(pred_depth,flag=1)
 depth = denormalize(depth,flag=1)
 dice=dice_coeff(pred_depth,depth)
-print("Dice Coefficient is :", dice)
+rel_dif = ab_rel_diff(pred_depth,depth)
+sq_rel_dif = sq_rel_diff(pred_depth,depth)
+rms = rms_linear(pred_depth,depth)
+print("Dice Coefficient is : ", dice)
+print("Absolute Relative Difference is : ", rel_dif)
+print("Square Relative Difference is : ", sq_rel_dif)
+print("RMS Difference is : ", rms)
