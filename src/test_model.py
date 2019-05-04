@@ -18,9 +18,11 @@ testImage = normalization(testImage).to(device)
 print(testImage)
 if modelType == 'p':
     model = torch.load("../P2Pmodel/" + bestModel)
-    output = model.G.forward(testImage)
+    gen = model.G.to(device)
+    output = gen.forward(testImage)
 else:
     model = torch.load("../CGmodel/" + bestModel)
-    output = model.G_XtoY.forward(testImage)
+    gen = model.G_XtoY.to(device)
+    output = gen.forward(testImage)
 
 cv2.imwrite( './testOutput.jpeg',np.array(denormalize(output).cpu().detach()).reshape(256, 256, 3))
