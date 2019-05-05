@@ -10,11 +10,11 @@ We aim to build a robust model that produces bokeh effect from an input image us
 We have trained both Resnet and Unet based Pix2Pix models (but Resnet model is used for final testing). In one step generator is trained twice and discriminator is trained once. It performs very well on NYU Depth Dataset but fails to seperate boundaries for other images (black and white appear in patches). This is possibly because it overfits the dataset (since number of parameters in pix2pix are quite less).
 <br>
 ![enter image description here](https://lh3.googleusercontent.com/QADfPo1O5AFOKMplFnPiSpEPYCNg2Rxzwqy6s8MNTJIMj1clcWO8jsxCV5B9t9fReRj2hPQ4Go77 "Pix2Pix")
-
-
 <br>
-
-![enter image description here](https://lh3.googleusercontent.com/IuckjCa9rGmslR5ASbi4DcWHfmF3xVO5tU54j4AAu622TifGGLh3bDQj580JgffSRwjfoAH_0nJl)![enter image description here](https://lh3.googleusercontent.com/58KzXHCDNW0vnVtAjOJWF-GAMQcpn9qW5L615AfrPNiSoGXk_lP7NLqcB6YTVxJU9vSXr8bj3t8w)
+<p align='float'>
+  <img src='./static/pix2pix1.jpeg' style="width: 300px;" />
+  <img src='./static/pix2pix2.jpeg' style="width: 300px;" />
+</p>
 
 ### Cycle GAN
 Cycle-GAN consists of two generators (Resnet Generator) and two discrimantors (Patch-GAN Discriminator). We trained on both 6-block and 9-block generators (9-block generator was found to be better). In one step generator is trained twice and discriminator is trained once. 
@@ -22,7 +22,10 @@ Cycle-GAN outperforms Pix2Pix on real world dataset in terms of boundary seperat
 <br>
 ![enter image description here](https://lh3.googleusercontent.com/OrKT0VSEgIMstHKxzW5DW2JY25HtAJxafb_4XB_3Bcnc8Dw45puzHt_bqKsLqxup_LtzY9ms7DJH)
 <br>
-![enter image description here](https://lh3.googleusercontent.com/qdlhQewjrfIrrLoniZQ3TG0PVEiDmgEaPF9tvOMYXrBhd_HwRpkGucONzN6yrUYi32aeDTVysT90 "man")![enter image description here](https://lh3.googleusercontent.com/RvHW2aHamC0hCsnfhfg7YxIpO2r-vA2JZNAbs_3ltP_5dz5uDnM1cdx1ily00Eia4fPpm6IFvpcD)
+<p align='float'>
+  <img src='./static/cycleGAN1.jpeg' style="width: 300px;" />
+  <img src='./static/cycleGAN2.jpeg' style="width: 300px;" />
+</p>
 
 
 
@@ -31,6 +34,17 @@ Cycle-GAN outperforms Pix2Pix on real world dataset in terms of boundary seperat
 |----------------|-------------------------------|-----------------------------|
 |Pix2Pix|      0.2448       |     2.0075    |    
 |Cycle-GAN         |0.3728           |3.1207          |   
+
+* Here are some of the loss graphs for our models.
+<i> Pix2Pix (using Resnet-9 Generator) </i>
+<p align='center'>
+  <img src='./static/loss_P2P.png' style="width: 600px;" />
+</p>
+<br>
+<i> CycleGAN (also using Resnet-9 Generator) </i>
+<p align='center'>
+  <img src='./static/loss_CG.png' style="width: 600px;" />
+</p>
 
 
 ## Bokeh from Depth + Input 
