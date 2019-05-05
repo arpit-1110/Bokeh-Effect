@@ -31,6 +31,9 @@ Cycle-GAN outperforms Pix2Pix on real world dataset in terms of boundary seperat
 
 ![enter image description here](https://lh3.googleusercontent.com/OrKT0VSEgIMstHKxzW5DW2JY25HtAJxafb_4XB_3Bcnc8Dw45puzHt_bqKsLqxup_LtzY9ms7DJH)
 <br>
+
+* Model losses 
+
 <p align = 'center'>
   <img src='./static/cycleGAN_model.png' style="width: 600px;" />
 </p>
@@ -101,12 +104,10 @@ After that run `python3 src/train.py <'CycleGAN/P2P'> [<finesize> <loadsize>]` f
 </ul>
 
 <i> Finding the Bokeh-Image from the given Image </i>
-
 <br>
  Run `python3 src/bokehEffect.py <modelName> <modelType(p/c)> <ImagePath>` to get the resultant Bokeh Image (bokeh.jpg)
  
 <i> Finding the Depthmap for the given RGB  image </i>
-
 <br>
 Run `python3 src/testModel.py <modelName> <ImagePath> <modelType(p/c)>` to get the resultant depthMap (testOutput.jpeg)
 
