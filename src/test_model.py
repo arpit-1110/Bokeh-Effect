@@ -4,7 +4,7 @@ import cv2
 from utils import normalization,denormalize
 import numpy as np
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 bestModel = sys.argv[1]
 testImage = sys.argv[2]
@@ -25,4 +25,4 @@ else:
     gen = model.G_XtoY.to(device)
     output = gen.forward(testImage)
 
-cv2.imwrite( './testOutput.jpeg',np.array(denormalize(output).cpu().detach()).reshape(256, 256, 3))
+cv2.imwrite( './testOutput.jpeg',np.array(denormalize(output).cpu().detach()).reshape(256, 256, 1))

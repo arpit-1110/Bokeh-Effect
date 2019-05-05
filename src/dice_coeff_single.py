@@ -22,7 +22,7 @@ depthMap = sys.argv[4]
 image = cv2.resize(cv2.imread(imagePath),(256,256), interpolation=cv2.INTER_CUBIC)
 depth = cv2.resize(cv2.imread(depthMap),(256,256), interpolation=cv2.INTER_CUBIC)
 image = torch.from_numpy(np.array(image).reshape(1,3,256,256)).float()
-depth = torch.from_numpy(np.array(depth).reshape(1,3,256,256)).float()
+depth = torch.from_numpy(np.array(depth).reshape(1,1,256,256)).float()
 
 
 if modelType == 'c' :
@@ -42,7 +42,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 image = normalization(image).to(device)
 pred_depth = gen.to(device).forward(image)
 depth = normalization(depth).to(device)
-cv2.imwrite("testDepth.jpg", np.array(denormalize(depth).cpu().detach()).reshape(256,256,3))
+cv2.imwrite("testDepth.jpg", np.array(denormalize(depth).cpu().detach()).reshape(256,256,1))
 pred_depth = denormalize(pred_depth,flag=1)
 depth = denormalize(depth,flag=1)
 dice=dice_coeff(pred_depth,depth)

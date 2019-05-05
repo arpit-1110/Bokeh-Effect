@@ -9,7 +9,7 @@ import time
 import copy
 from torch.autograd import Variable
 from utils import dice_coeff, normalization, denormalize
-from data_loader import NYU_Depth_V2, NYU_Depth_V2_v2
+from data_loader import NYU_Depth_V2, NYU_Depth_V2_v2, NYU_Depth_V3
 import cv2
 import numpy as np
 import os
@@ -25,9 +25,9 @@ torch.set_default_tensor_type('torch.FloatTensor')
 # else:
 # 	torch.set_default_tensor_type('torch.FloatTensor')
 
-train_set = NYU_Depth_V2('train')
+train_set = NYU_Depth_V3('train')
 print('Loaded training set')
-val_set = NYU_Depth_V2('val')
+val_set = NYU_Depth_V3('val')
 print('Loaded val set')
 
 
@@ -93,9 +93,9 @@ else:
 
 opt = Optimizer(lr=1e-4, beta1=0.5, lambda_L1=0.01, n_epochs=100, batch_size=4)
 
-p2p_opt = p2pOptimizer(input_nc=3, output_nc=3, num_downs=8, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=True, ndf=64, n_layers_D=3, lr=0.0002, beta1=0.5, lambda_L1=5, n_blocks=9, padding_type='reflect')
+p2p_opt = p2pOptimizer(input_nc=3, output_nc=1, num_downs=8, ngf=64, norm_layer=nn.InstanceNorm2d, use_dropout=False, ndf=64, n_layers_D=3, lr=0.0001, beta1=0.5, lambda_L1=5, n_blocks=9, padding_type='replicate')
 
-cg_opt = cgOptimizer(input_nc=3, output_nc=3, ngf=64, norm=nn.InstanceNorm2d, no_dropout=True, n_blocks=9,
+cg_opt = cgOptimizer(input_nc=3, output_nc=1, ngf=64, norm=nn.InstanceNorm2d, no_dropout=True, n_blocks=9,
                  padding_type='replicate', ndf=64, n_layers_D = 3, pool_size = 50, lr = 0.0001, beta1 = 0.5 , lambda_A = 5, lambda_B = 5,pool=False)
 
 
@@ -216,16 +216,22 @@ def train(opt, model_name):
 					if cg_opt.n_blocks==6:
 						cv2.imwrite( os.path.join('../cgresults/pred_masks',
 							'mask_{}_{}_{}.png'.format(batch, j, epoch)),
-						  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,3))
+						  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,1))
 						if epoch == 9:
 							cv2.imwrite( os.path.join('../cgresults/inputs',
 								'input_{}_{}_{}.png'.format(batch, j, epoch)),
 							  np.array(denormalize(fixed_X[j]).cpu().detach()).reshape(256,256, 3))
+							cv2.imwrite( os.path.join('../cgresults/inputs',
+								'ground_depth_{}_{}_{}.png'.format(batch, j, epoch)),
+							  np.array(denormalize(fixed_Y[j]).cpu().detach()).reshape(256,256, 1))
 					else:
 						cv2.imwrite( os.path.join('../cgresults/r-9-pred_masks',
 									'mask_{}_{}_{}.png'.format(batch, j, epoch)),
-								  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,3))
+								  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,1))
 						if epoch == 9:
+							cv2.imwrite( os.path.join('../cgresults/r-9-inputs',
+								'ground_depth_{}_{}_{}.png'.format(batch, j, epoch)),
+							  np.array(denormalize(fixed_Y[j]).cpu().detach()).reshape(256,256, 1))
 							cv2.imwrite( os.path.join('../cgresults/r-9-inputs',
 								'input_{}_{}_{}.png'.format(batch, j, epoch)),
 							  np.array(denormalize(fixed_X[j]).cpu().detach()).reshape(256,256, 3))
@@ -234,15 +240,15 @@ def train(opt, model_name):
 
 			print("Time to finish epoch ", time.time()-since)
 
-			torch.save(model, '../CGmodel/best_model5.pt')
+			torch.save(model, '../CGmodel/best_model6.pt')
 			loss_Gl.append(float(model.loss_G))
 			loss_DXl.append(float(model.loss_D_X))
 			loss_DYl.append(float(model.loss_D_Y))
-			with open('../CGloss/lossG5.pk', 'wb') as f:
+			with open('../CGloss/lossG6.pk', 'wb') as f:
 				pickle.dump(loss_Gl, f)
-			with open('../CGloss/lossD_X5.pk', 'wb') as f:
+			with open('../CGloss/lossD_X6.pk', 'wb') as f:
 				pickle.dump(loss_DXl, f)
-			with open('../CGloss/lossd_Y5.pk', 'wb') as f:
+			with open('../CGloss/lossd_Y6.pk', 'wb') as f:
 				pickle.dump(loss_DYl, f)
 
 
@@ -287,27 +293,27 @@ def train(opt, model_name):
 				depth_map = model.G.forward(fixed_X)
 				for j in range(depth_map.size()[0]):
 					cv2.imwrite( os.path.join('../p2presults/pred_masks',
-						'mask_{}_{}_{}.png'.format(batch, j, epoch)),
-					  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,3))
+						'mask10_{}_{}_{}.png'.format(batch, j, epoch)),
+					  np.array(denormalize(depth_map[j]).cpu().detach()).reshape(256,256,1))
 					if epoch == 9:
 						cv2.imwrite( os.path.join('../p2presults/inputs',
-							'input_{}_{}_{}.png'.format(batch, j, epoch)),
+							'input10_{}_{}_{}.png'.format(batch, j, epoch)),
 						  np.array(denormalize(fixed_X[j]).cpu().detach()).reshape(256,256, 3))
 						cv2.imwrite( os.path.join('../p2presults/inputs',
-							'ground_depth_{}_{}_{}.png'.format(batch, j, epoch)),
-						  np.array(denormalize(fixed_Y[j]).cpu().detach()).reshape(256,256, 3))
+							'ground_depth10_{}_{}_{}.png'.format(batch, j, epoch)),
+						  np.array(denormalize(fixed_Y[j]).cpu().detach()).reshape(256,256, 1))
 
 
 				# torch.set_grad_enabled(True)
 
 			print("Time to finish epoch ", time.time()-since)
 
-			torch.save(model, '../P2Pmodel/best_model8.pt')
+			torch.save(model, '../P2Pmodel/best_model10.pt')
 			loss_Gl.append(float(model.loss_G))
 			loss_Dl.append(float(model.loss_D))
-			with open('../P2Ploss/lossG8.pk', 'wb') as f:
+			with open('../P2Ploss/lossG10.pk', 'wb') as f:
 				pickle.dump(loss_Gl, f)
-			with open('../P2Ploss/lossD8.pk', 'wb') as f:
+			with open('../P2Ploss/lossD10.pk', 'wb') as f:
 				pickle.dump(loss_Dl, f)
 
 
