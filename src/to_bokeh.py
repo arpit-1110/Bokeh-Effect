@@ -31,11 +31,11 @@ def disc_blur(img, r):
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             # if i > 0 and j > 0 and i < 255 and j < 255:
-            # 	final_img[i, j] = (image[i-1, j-1] + image[i-1, j] + image[i-1, j+1] + image[i, j+1] +
-            # 				image[i+1, j+1] + image[i+1, j] + image[i+1, j-1] + image[i, j-1]
-            # 				+ image[i, j])//9
+            #   final_img[i, j] = (image[i-1, j-1] + image[i-1, j] + image[i-1, j+1] + image[i, j+1] +
+            #               image[i+1, j+1] + image[i+1, j] + image[i+1, j-1] + image[i, j-1]
+            #               + image[i, j])//9
             # else:
-            # 	final_img[i, j] = image[i, j]
+            #   final_img[i, j] = image[i, j]
             count = 0
             all_pixel = np.zeros(image[i, j].shape)
             for a in range(-r,r):
@@ -52,32 +52,39 @@ from utils import get_faces
 
 def in_face(i, j, faces):
     for face in faces:
-        if j > face[0] and i > face[1] and j < face[0] + face[2] and j < face[1] + face[3]:
+        # print(j > face[0])
+        if j > face[0] and i > face[1] and j < face[0] + face[2] and i < face[1] + face[3]:
             return True
     return False
 
-def to_bokeh(img, depth):
+def to_bokeh(img, depth, gamma, thresh, down):
     image = cv2.imread(img)
     depth_mask = np.array(cv2.imread(depth))
     # print(image.shape)
-    gamma_corrected_img = adjust_gamma(image, 10)
+    gamma_corrected_img = adjust_gamma(image, gamma)
     bokeh = disc_blur(gamma_corrected_img, 5)
     # print(bokeh.shape)
-    bokeh = adjust_gamma(bokeh, 0.1)
-    # blurImg = disc_blur(image, 2)
-    # final_img = np.max(bokeh, blurImg)
+    bokeh = np.array(adjust_gamma(bokeh, 1/gamma))
+    blurImg = disc_blur(image, 5)
+    bokeh = np.maximum(bokeh, blurImg)
     faces = get_faces(img)
     print(faces)
     image = np.array(image)
     final_img = np.zeros(image.shape)
-    for i in range(depth_mask.shape[0]):
-        for j in range(depth_mask.shape[1]):
-            print(in_face(i, j, faces))
-            if np.mean(depth_mask[i, j]) > 120 and not in_face(i, j, faces):
+    print(image.shape)
+    max_depth = np.max(depth_mask)
+    print(max_depth)
+    if len(faces) == 0:
+        thresh = 2
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            if in_face(i, j, faces):
+                depth_mask[i, j] = depth_mask[i, j]//down
+            if np.mean(depth_mask[i, j]) > max_depth//thresh:
                 final_img[i, j] = bokeh[i, j]
             else :
                 final_img[i, j] = image[i, j]
     cv2.imwrite('bokeh.jpg', final_img)
 
 
-to_bokeh(imageName, depthMap)
+to_bokeh(imageName, depthMap, 20.0, 2.5, 2.5)
