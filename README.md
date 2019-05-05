@@ -113,7 +113,7 @@ Run `python3 src/testModel.py <modelName> <ImagePath> <modelType(p/c)>` to get t
 
 ## References
 
---> https://neurohive.io/en/popular-networks/pix2pix-image-to-image-translation/
+--> https://neurohive.io/en/popular-networks/pix2pix-image-to-image-translation/ <br>
 --> https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html
 
 
