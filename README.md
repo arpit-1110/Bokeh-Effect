@@ -111,6 +111,12 @@ After that run `python3 src/train.py <'CycleGAN/P2P'> [<finesize> <loadsize>]` f
 <br>
 Run `python3 src/testModel.py <modelName> <ImagePath> <modelType(p/c)>` to get the resultant depthMap (testOutput.jpeg)
 
+## Downloading preTrained Models
+
+The weights of the CycleGAN model can be downloaded from [here](https://drive.google.com/open?id=15vmPYVIL53xLbGQY5YYJpDmqeIfq3x2s) <br>
+
+Ther weights of the Pix2Pix model can be downloaded from [here](https://drive.google.com/open?id=1i4d4VFz4caLrcJ415T2uX2td_CweJaDz)
+
 ## References
 
 --> https://neurohive.io/en/popular-networks/pix2pix-image-to-image-translation/ <br>
