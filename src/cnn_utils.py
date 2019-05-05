@@ -3,10 +3,6 @@ import torch.nn as nn
 import functools
 import torch.nn.functional as F
 
-# if torch.cuda.is_available():
-#     torch.set_default_tensor_type('torch.cuda.FloatTensor')
-# else:
-#     torch.set_default_tensor_type('torch.FloatTensor')
 
 ###### Pix2Pix Utilities ##########################################################
 
@@ -77,17 +73,6 @@ class Discriminator(nn.Module):
 
     def forward(self, inp, un):
         return self.model(torch.cat((inp, un), 1))
-
-
-
-
-# if __name__ == '__main__':
-# 	inp = torch.randn(1, 3, 256, 256)
-# 	un = torch.randn(1, 3, 256, 256)
-# 	model = Discriminator()
-# 	# model2 = downConv(3, 64)
-# 	# print(model)
-# 	print(model(inp, un))
 
 #######################################################################################
 

@@ -3,9 +3,9 @@ import os
 import numpy as np
 import cv2
 
-matPath = '../data/nyu_depth_v2_labeled.mat'
-img_folder = '../data/imgs'
-dep_folder = '../data/depths'
+matPath = 'data/nyu_depth_v2_labeled.mat'
+img_folder = 'data/imgs'
+dep_folder = 'data/depths'
 
 if not os.path.exists(img_folder):
     os.makedirs(img_folder)
@@ -35,7 +35,7 @@ def save_image_dep(image_id):
     img_ = img_  # /255.0
     print(np.amax(depth_))
     depth_ = 255.*cv2.normalize(depth_, 0, 255, cv2.NORM_MINMAX)
-    depth_ = np.mean(np.array(depth_),axis=2)
+    # depth_ = np.mean(np.array(depth_),axis=2)   # Uncomment this line for single Channel greyscale image
 
     cv2.imwrite(os.path.join(img_folder,'{}_img.png'.format(i)), img_)
     cv2.imwrite(os.path.join(dep_folder,'{}_depth.png'.format(i)), depth_)

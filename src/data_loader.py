@@ -32,8 +32,7 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
             if self.X_train[idx][12:-7] == self.y_train[idx][14:-9]:
                 X = np.array(cv2.imread(self.X_train[idx])).reshape(3, 256, 256)
                 y = np.array(cv2.imread(self.y_train[idx])).reshape(3, 256, 256)
-                # X = np.array(cv2.resize(cv2.imread(self.X_train[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128)
-                # y = np.array(cv2.resize(cv2.imread(self.y_train[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128) #Changes mad
+
             else:
                 raise ValueError
 
@@ -43,8 +42,7 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
             if self.X_val[idx][12:-7] == self.y_val[idx][14:-9]:
                 X = np.array(cv2.imread(self.X_val[idx])).reshape(3, 256, 256)
                 y = np.array(cv2.imread(self.y_val[idx])).reshape(3, 256, 256)
-                # X = np.array(cv2.resize(cv2.imread(self.X_val[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128)
-                # y = np.array(cv2.resize(cv2.imread(self.y_val[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128) #Changes mad
+
             else:
                 raise ValueError
 
@@ -54,8 +52,7 @@ class NYU_Depth_V2(torch.utils.data.Dataset):
             if self.X_test[idx][12:-7] == self.y_test[idx][14:-9]:
                 X = np.array(cv2.imread(self.X_test[idx])).reshape(3, 256, 256)
                 y = np.array(cv2.imread(self.y_test[idx])).reshape(3, 256, 256)
-                # X = np.array(cv2.resize(cv2.imread(self.X_test[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128)
-                # y = np.array(cv2.resize(cv2.imread(self.y_test[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128)  # Changes made in the above lines
+
             else:
                 raise ValueError
 
@@ -99,9 +96,6 @@ class NYU_Depth_V2_v2(torch.utils.data.Dataset):
                 X = np.array(imgX).reshape(3,self.finesize,self.finesize)
                 y = np.array(imgy).reshape(3,self.finesize,self.finesize)
 
-
-                # X = np.array(cv2.resize(cv2.imread(self.X_train[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128)
-                # y = np.array(cv2.resize(cv2.imread(self.y_train[idx]),(0,0), fx=0.5, fy=0.5)).reshape(3, 128, 128) #Changes mad
             else:
                 raise ValueError
 
@@ -109,15 +103,7 @@ class NYU_Depth_V2_v2(torch.utils.data.Dataset):
 
         if self.data_type == 'val':
             if self.X_val[idx][12:-7] == self.y_val[idx][14:-9]:
-                # imgX = cv2.resize(cv2.imread(self.X_val[idx]), (self.loadsize,self.loadsize), interpolation=cv2.INTER_CUBIC)
-                # imgy = cv2.resize(cv2.imread(self.y_val[idx]), (self.loadsize,self.loadsize), interpolation=cv2.INTER_CUBIC)
-                # a = random.randint(0,self.loadsize-self.finesize-2)
-                # print('Random call hua hai')
-                # b = random.randint(0,self.loadsize-self.finesize-2)
-                # imgX = imgX[a:a+self.finesize,b:b+self.finesize]
-                # imgy = imgy[a:a+self.finesize,b:b+self.finesize]
-                # X = np.array(imgX).reshape(3,self.finesize,self.finesize)
-                # y = np.array(imgy).reshape(3,self.finesize,self.finesize)
+
                 X = np.array(cv2.imread(self.X_val[idx])).reshape(3, 256, 256)
                 y = np.array(cv2.imread(self.y_val[idx])).reshape(3, 256, 256)  # Changes mad
             else:
@@ -127,15 +113,7 @@ class NYU_Depth_V2_v2(torch.utils.data.Dataset):
 
         if self.data_type == 'test':
             if self.X_test[idx][12:-7] == self.y_test[idx][14:-9]:
-                # imgX = cv2.resize(cv2.imread(self.X_test[idx]), (self.loadsize,self.loadsize), interpolation=cv2.INTER_CUBIC)
-                # imgy = cv2.resize(cv2.imread(self.y_test[idx]), (self.loadsize,self.loadsize), interpolation=cv2.INTER_CUBIC)
-                # a = random.randint(0,self.loadsize-self.finesize-2)
-                # print('Random call hua hai')
-                # b = random.randint(0,self.loadsize-self.finesize-2)
-                # imgX = imgX[a:a+self.finesize,b:b+self.finesize]
-                # imgy = imgy[a:a+self.finesize,b:b+self.finesize]
-                # X = np.array(imgX).reshape(3,self.finesize,self.finesize)
-                # y = np.array(imgy).reshape(3,self.finesize,self.finesize)
+
                 X = np.array(cv2.imread(self.X_val[idx])).reshape(3, 256, 256)
                 y = np.array(cv2.imread(self.y_val[idx])).reshape(3, 256, 256)  # Changes made in the above lines
             else:

@@ -49,21 +49,21 @@ for i in range(int(len(test_dataset)/1)):
     gen_Y = gen.forward(X)
     gen_Y = denormalize(gen_Y,flag=1)
     Y = denormalize(Y,flag=1)
-    dice_s = dice_coeff(gen_Y,Y)
+    # dice_s = dice_coeff(gen_Y,Y)
     rel_diff = ab_rel_diff(gen_Y,Y)
     sq_rel_differ = sq_rel_diff(gen_Y,Y)
     rms = rms_linear(gen_Y,Y)
-    dice_val += dice_s
+    # dice_val += dice_s
     rel_val += rel_diff
     sq_val += sq_rel_differ
     rms_val += rms
-    print("Dice coefficient for batch ", i+1, " : ", dice_s)
+    # print("Dice coefficient for batch ", i+1, " : ", dice_s)
     print("Absolute relative difference for batch ", i+1, " : ", rel_diff)
     print("Square relative difference for batch ", i+1, " : ", sq_rel_differ)
     print("RMS loss for batch ", i+1, " : ", rms)
     count= count+1
 
-print("Average Dice Coefficient: ", dice_val/count)
+# print("Average Dice Coefficient: ", dice_val/count)
 print("Average absolute relative difference : ", rel_val/count)
 print("Averag Square relative difference: ", sq_val/count)
 print("Average RMS loss: ", rms_val/count)

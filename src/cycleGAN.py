@@ -53,10 +53,7 @@ class cycleGan():
         self.optimizer_DX = torch.optim.Adam(self.D_X.parameters(), lr=opt.lr, betas=[opt.beta1, 0.999])
         self.optimizer_DY = torch.optim.Adam(self.D_Y.parameters(), lr=opt.lr, betas=[opt.beta1, 0.999])
 
-        # self.genParams = list(self.G_XtoY.parameters()) + list(self.G_YtoX.parameters())
-        # self.g_optim = optim.Adam(self.genParams,lr,[beta1,beta2])
-        # self.dx_optim = optim.Adam(self.D_X.parameters(),lr,[beta1,beta2])
-        # self.dy_optim = optim.Adam(self.D_Y.parameters(),lr,[beta1,beta2])
+
 
     def get_input(self, inputX, inputY):
         self.inputX = inputX
@@ -117,60 +114,6 @@ class cycleGan():
         self.optimizer_DX = torch.optim.Adam(self.D_X.parameters(), lr=self.opt.lr, betas=[self.opt.beta1, 0.999])
         self.optimizer_DY = torch.optim.Adam(self.D_Y.parameters(), lr=self.opt.lr, betas=[self.opt.beta1, 0.999])
 
-
-
-
-
-    # def trainDX(self, inputX, inputY):
-    #     self.dx_optim.zero_grad()
-    #     out_X = self.D_X(inputX)
-    #     real_loss = real_mse_loss(out_X)
-
-    #     fake_X = self.G_YtoX(inputY)
-    #     out_X_fake = self.D_X(fake_X)
-    #     fake_loss = fake_mse_loss(out_X_fake)
-
-    #     loss = fake_loss + real_loss
-    #     self.dx_loss = loss
-    #     loss = loss.backward()
-    #     self.dx_optim.step()
-
-    # def trainDY(self, inputX, inputY):
-    #     self.dy_optim.zero_grad()
-    #     out_Y = self.D_Y(inputY)
-    #     real_loss = real_mse_loss(out_Y)
-
-    #     fake_Y = self.G_XtoY(inputX)
-    #     out_Y_fake = self.D_Y(fake_Y)
-    #     fake_loss = fake_mse_loss(out_Y_fake)
-
-    #     loss = fake_loss + real_loss
-    #     self.dy_loss = loss
-    #     loss = loss.backward()
-    #     self.dy_optim.step()
-
-    # def trainGen(self, inputX, inputY):
-    #     self.g_optim.zero_grad()
-
-    #     fake_X = self.G_YtoX(inputY)
-    #     out_X = self.D_X(fake_X)
-    #     g_YtoX_loss = real_mse_loss(out_X)
-
-    #     reconstructed_Y = self.G_XtoY(fake_X)
-    #     reconstructed_y_loss = cycle_consistency_loss(inputY, reconstructed_Y, lambda_weight=10)
-
-    #     fake_Y = self.G_XtoY(inputX)
-    #     out_Y = self.D_Y(fake_Y)
-    #     g_XtoY_loss = real_mse_loss(out_Y)
-
-    #     reconstructed_X = self.G_YtoX(fake_Y)
-    #     reconstructed_x_loss = cycle_consistency_loss(inputX, reconstructed_X, lambda_weight=10)
-
-    #     g_total_loss = g_YtoX_loss + g_XtoY_loss + reconstructed_y_loss + reconstructed_x_loss
-    #     self.gen_loss = g_total_loss
-    #     g_total_loss.backward()
-    #     self.g_optim.step()
-
     def set_requires_grad(self, nets, requires_grad=False):
 
         if not isinstance(nets, list):
@@ -182,13 +125,7 @@ class cycleGan():
 
 
     def optimize(self):
-        # print(self.inputX.size())
-        # print(self.inputY.size())
-        # a = self.inputX
-        # b = self.inputY
-        # self.trainDX(a, b)
-        # self.trainDY(a, b)
-        # self.trainGen(a, b)
+
         self.set_requires_grad([self.D_X, self.D_Y], False)
         self.forward()
         self.optimizer_G.zero_grad()  # set G_A and G_B's gradients to zero

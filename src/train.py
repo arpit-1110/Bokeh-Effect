@@ -30,44 +30,7 @@ print('Loaded training set')
 val_set = NYU_Depth_V2('val')
 print('Loaded val set')
 
-
-
-#For Cycle GAN
-# image_size = 256
-# transform = transforms.Compose([ transforms.Resize(image_size),
-#                                     transforms.ToTensor()])
-# img_path = '../data/imgs'
-# depth_path = '../data/depths'
-# train_X_dir= img_path +'_train'
-# train_Y_dir = depth_path + '_train'
-# val_X_dir = img_path + '_val'
-# val_Y_dir = depth_path + '_val'
-
-# class ConcatDataset(torch.utils.data.Dataset):
-#     def __init__(self, *datasets):
-#         self.datasets = datasets
-
-#     def __getitem__(self, i):
-#         return tuple(d[i] for d in self.datasets)
-
-#     def __len__(self):
-#         return min(len(d) for d in self.datasets)
-
-# cg_train_loader = torch.utils.data.DataLoader(
-#              ConcatDataset(
-#                  datasets.ImageFolder(train_X_dir,transform),
-#                  datasets.ImageFolder(train_Y_dir,transform)
-#              ),
-#              batch_size=16, shuffle=True,
-#              num_workers=0)
-
-# cg_val_loader = torch.utils.data.DataLoader(
-#              ConcatDataset(
-#                  datasets.ImageFolder(val_X_dir,transform),
-#                  datasets.ImageFolder(val_Y_dir,transform)
-#              ),
-#              batch_size=16, shuffle=True,
-#              num_workers=0)
+# For Resize and Random Crop
 loadSize = 0
 fineSize = 0
 if len(sys.argv) == 3:
@@ -115,7 +78,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # print(dataset_size)
 def train(opt, model_name):
-	if model_name == 'pix2pix':
+	if model_name == 'pix2pix':  #This is for Arpit's version of Pix2Pix
 		model = Pix2Pix(opt)
 		# best_model_wts = copy.deepcopy(model.state_dict())
 		# best_acc = 0.0
@@ -137,22 +100,10 @@ def train(opt, model_name):
 						model.get_input(Data)
 						if phase == 0:
 							model.optimize()
-							# pred_mask = model.forward(inputs)
-							# if i%25 == 0:
-							# 	for j in range(pred_mask.size()[0]):
-							# 		cv2.imwrite( os.path.join('../results/pred_masks',
-							# 			'train_mask_{}_{}_{}.png'.format(i, j, epoch)),
-							# 		  np.array(denormalize(pred_mask[j]).cpu().detach()).reshape(256, 256, 3))
-							# 		cv2.imwrite( os.path.join('../results/inputs',
-							# 			'train_input_{}_{}_{}.png'.format(i, j, epoch)),
-							# 		  np.array(denormalize(inputs[j]).cpu().detach()).reshape(256, 256, 3))
+
 						else:
 							pred_mask = model.forward(inputs)
 
-							# t = ToPILImage()
-							# a = {j: t(pred_mask[j].cpu().detach()) for j in range(pred_mask.size()[0])}
-							# b = {j: t(inputs[j].cpu().detach()) for j in range(inputs.size()[0])}
-							# if i%25 == 0:
 							for j in range(pred_mask.size()[0]):
 								cv2.imwrite( os.path.join('../results/pred_masks',
 									'mask_{}_{}_{}.png'.format(i, j, epoch)),
@@ -246,7 +197,7 @@ def train(opt, model_name):
 				pickle.dump(loss_DYl, f)
 
 
-	elif model_name == 'P2P':
+	elif model_name == 'P2P':  # This is for Khem's version of Pix2Pix
 		model = Pix2Pix(p2p_opt)
 		print_freq = 10
 		train_iter = iter(p2p_train_loader)
